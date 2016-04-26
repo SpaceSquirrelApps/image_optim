@@ -9,8 +9,8 @@ require 'in_threads'
 require 'shellwords'
 
 %w[
-  pngcrush pngout advpng optipng pngquant
-  jhead jpegoptim jpegrecompress jpegtran
+  pngcrush pngout advpng optipng pngquant zopflipng
+  jhead jpegoptim jpegrecompress jpegtran cjpeg
   gifsicle
   svgo
 ].each do |worker|
