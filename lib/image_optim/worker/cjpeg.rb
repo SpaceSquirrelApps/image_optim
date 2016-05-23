@@ -26,7 +26,7 @@ class ImageOptim
       def optimize(src, dst)
          # /usr/local/Cellar/mozjpeg/3.1/bin/cjpeg -quality 90 -optimize -progressive -outfile 1moz.jpg 1.jpg
         args = %W[
-          -quality=#{quality}
+          -quality #{quality}
           -optimize
           -progressive
           -outfile #{dst}
