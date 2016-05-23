@@ -1,14 +1,13 @@
-if ENV['CODECLIMATE_REPO_TOKEN']
-  begin
-    require 'codeclimate-test-reporter'
-    CodeClimate::TestReporter.start
-  rescue LoadError => e
-    $stderr.puts "Got following while loading codeclimate-test-reporter: #{e}"
-  end
+if ENV['CODECLIMATE_REPO_TOKEN'] && RUBY_VERSION >= '1.9'
+  require 'codeclimate-test-reporter'
+  CodeClimate::TestReporter.start
 end
 
 RSpec.configure do |c|
-  c.alias_example_to :they
+  c.before do
+    stub_const('ImageOptim::Config::GLOBAL_PATH', '/dev/null')
+    stub_const('ImageOptim::Config::LOCAL_PATH', '/dev/null')
+  end
 end
 
 def flatten_animation(image)
