@@ -31,10 +31,6 @@ class ImageOptim
     def resolve!(name)
       name = name.to_sym
 
-      if @image_optim.verbose
-        $stderr << "resolving #{name} \n"
-      end
-
       resolving(name) do
         path = symlink_custom_bin!(name) || full_path(name)
         bin = Bin.new(name, path) if path
