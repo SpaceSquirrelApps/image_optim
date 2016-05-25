@@ -37,6 +37,8 @@ class ImageOptim
 
         if bin && @image_optim.verbose
           $stderr << "Resolved #{bin}\n"
+        elsif @image_optim.verbose
+          $stderr << "Can't find #{name} -> #{bin}\n"
         end
 
         @bins[name] = bin
