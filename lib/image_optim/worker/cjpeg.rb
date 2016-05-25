@@ -4,6 +4,7 @@ require 'image_optim/option_helpers'
 class ImageOptim
   class Worker
     class Cjpeg < Worker
+      ALLOW_LOSSY_OPTION = option(:allow_lossy, false, 'Allow worker, it is always lossy'){ |v| !!v }
 
       # Initialize only if allow_lossy
       def self.init(image_optim, options = {})
