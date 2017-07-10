@@ -87,7 +87,7 @@ class ImageOptim
           date_regexp = /[A-Z][a-z]{2} (?: |\d)\d \d{4}/
           date_str = capture("#{escaped_path} 2>&1")[date_regexp]
           Date.parse(date_str).strftime('%Y%m%d') if date_str
-        when :jpegrescan, :zopflipng
+        when :jpegrescan, :zopflipng, :guetzli
           # jpegrescan has no version so use first 8 characters of sha1 hex
           Digest::SHA1.file(path).hexdigest[0, 8] if path
         else

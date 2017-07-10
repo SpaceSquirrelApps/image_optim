@@ -10,7 +10,7 @@ require 'shellwords'
 
 %w[
   pngcrush pngout advpng optipng pngquant zopflipng
-  jhead jpegoptim jpegrecompress jpegtran cjpeg
+  jhead jpegoptim jpegrecompress jpegtran cjpeg guetzli
   gifsicle
   svgo
 ].each do |worker|
