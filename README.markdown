@@ -1,9 +1,10 @@
 [![Gem Version](https://img.shields.io/gem/v/image_optim.svg?style=flat)](https://rubygems.org/gems/image_optim)
 [![Build Status](https://img.shields.io/travis/toy/image_optim/master.svg?style=flat)](https://travis-ci.org/toy/image_optim)
-[![Code Climate](https://img.shields.io/codeclimate/github/toy/image_optim.svg?style=flat)](https://codeclimate.com/github/toy/image_optim)
-[![Code Climate Coverage](https://img.shields.io/codeclimate/coverage/github/toy/image_optim.svg?style=flat)](https://codeclimate.com/github/toy/image_optim)
+[![AppVeyor Status](https://img.shields.io/appveyor/ci/toy/image-optim/master.svg?style=flat&label=windows)](https://ci.appveyor.com/project/toy/image-optim)
+[![Code Climate](https://img.shields.io/codeclimate/maintainability/toy/image_optim.svg?style=flat)](https://codeclimate.com/github/toy/image_optim)
+[![Code Climate Coverage](https://img.shields.io/codeclimate/c/toy/image_optim.svg?style=flat)](https://codeclimate.com/github/toy/image_optim)
 [![Dependency Status](https://img.shields.io/gemnasium/toy/image_optim.svg?style=flat)](https://gemnasium.com/toy/image_optim)
-[![Inch CI](http://inch-ci.org/github/toy/image_optim.svg?branch=master&style=flat)](http://inch-ci.org/github/toy/image_optim)
+[![Inch CI](https://inch-ci.org/github/toy/image_optim.svg?branch=master&style=flat)](https://inch-ci.org/github/toy/image_optim)
 
 # image_optim
 
@@ -55,9 +56,11 @@ gem 'image_optim_pack'
 
 With version:
 
+<!---<update-version>-->
 ```ruby
-gem 'image_optim', '~> 0.11'
+gem 'image_optim', '~> 0.26'
 ```
+<!---</update-version>-->
 
 If you want to check latest changes:
 
@@ -95,7 +98,7 @@ Besides permanently setting environment variables in `~/.profile`, `~/.bash_prof
 
 ### Binaries pack
 
-Easiest way to get latest versions of most binaries for `image_optim` for Linux and Mac OS X is by installing [`image_optim_pack`](https://github.com/toy/image_optim_pack) gem.
+Easiest way to get latest versions of most binaries for `image_optim` for Linux, Mac OS X, FreeBSD and OpenBSD is by installing [`image_optim_pack`](https://github.com/toy/image_optim_pack) gem.
 
 Check installation instructions in [Gem installation](#gem-installation) section.
 
@@ -158,12 +161,12 @@ sudo port install advancecomp gifsicle jhead jpegoptim jpeg optipng pngcrush png
 ### OS X: Brew
 
 ```bash
-brew install advancecomp gifsicle jhead jpegoptim jpeg optipng pngcrush pngquant
+brew install advancecomp gifsicle jhead jpegoptim jpeg optipng pngcrush pngquant jonof/kenutils/pngout
 ```
 
 ### pngout installation (optional)
 
-You can install `pngout` by downloading and installing the [binary versions](http://www.jonof.id.au/kenutils).
+If you installed the dependencies via brew, pngout should be installed already. Otherwise, you can install `pngout` by downloading and installing the [binary versions](http://www.jonof.id.au/kenutils).
 
 _Note: pngout is free to use even in commercial soft, but you can not redistribute, repackage or reuse it without consent and agreement of creator. [license](http://advsys.net/ken/utils.htm#pngoutkziplicense)_
 
@@ -238,12 +241,7 @@ image_optim.optimize_images_data(datas)
 
 ### From rails
 
-`ImageOptim::Railtie` will automatically register sprockets preprocessor unless you set `config.assets.image_optim = false` or `config.assets.compress = false` (later for partial rails 3 compatibility).
-
-You can provide options for image_optim used for preprocessor through config `config.assets.image_optim = {nice: 20, svgo: false}` (ruby1.8 style: `{:nice => 20, :svgo => false}`).
-Check available options in [options section](#options).
-
-Image optimization can be time consuming, so depending on your deployment process you may prefer to optimize original asset files.
+Rails image assets optimization is extracted into [image\_optim\_rails gem](https://github.com/toy/image_optim_rails).
 
 ## Configuration
 
@@ -265,12 +263,14 @@ optipng:
 
 ## Options
 
-* `:nice` — Nice level *(defaults to `10`)*
+* `:nice` — Nice level, priority of all used tools with higher value meaning lower priority, in range `-20..19`, negative values can be set only if run by root user *(defaults to `10`)*
 * `:threads` — Number of threads or disable *(defaults to number of processors)*
 * `:verbose` — Verbose output *(defaults to `false`)*
 * `:pack` — Require image\_optim\_pack or disable it, by default image\_optim\_pack will be used if available, will turn on `:skip-missing-workers` unless explicitly disabled *(defaults to `nil`)*
 * `:skip_missing_workers` — Skip workers with missing or problematic binaries *(defaults to `false`)*
 * `:allow_lossy` — Allow lossy workers and optimizations *(defaults to `false`)*
+* `:cache_dir` — Configure cache directory
+* `:cache_worker_digests` - Also cache worker digests along with original file digest and worker options: updating workers invalidates cache
 
 Worker can be disabled by passing `false` instead of options hash or by setting option `:disable` to `true`.
 
@@ -300,7 +300,7 @@ Worker has no options
 ### jpegtran:
 * `:copy_chunks` — Copy all chunks *(defaults to `false`)*
 * `:progressive` — Create progressive JPEG file *(defaults to `true`)*
-* `:jpegrescan` — Use jpegtran through jpegrescan, ignore progressive option *(defaults to `false`)*
+* `:jpegrescan` — Use jpegtran through jpegrescan, ignore progressive option *(defaults to `true`)*
 
 ### optipng:
 * `:level` — Optimization level preset: `0` is least, `7` is best *(defaults to `6`)*
@@ -319,6 +319,7 @@ Worker has no options
 
 ### pngquant:
 * `:allow_lossy` — Allow quality option *(defaults to `false`)*
+* `:max_colors` — Maximum number of colors to use *(defaults to `256`)*
 * `:quality` — min..max - don't save below min, use less colors below max (both in range `0..100`; in yaml - `!ruby/range 0..100`), ignored in default/lossless mode *(defaults to `100..100`, `0..100` in lossy mode)*
 * `:speed` — speed/quality trade-off: `1` - slow, `3` - default, `11` - fast & rough *(defaults to `3`)*
 
@@ -334,14 +335,10 @@ Worker has no options
 
 If you would like to contribute - that is great and you are very welcome. Please check few notes in file [CONTRIBUTING.markdown](CONTRIBUTING.markdown).
 
-Financial contributions can be made via [gratipay](https://gratipay.com/toy/).
-
-[![Support via Gratipay](https://cdn.rawgit.com/gratipay/gratipay-badge/2.1.2/dist/gratipay.png)](https://gratipay.com/toy/)
-
 ## ChangeLog
 
 In separate file [CHANGELOG.markdown](CHANGELOG.markdown).
 
 ## Copyright
 
-Copyright (c) 2012-2016 Ivan Kuchin. See [LICENSE.txt](LICENSE.txt) for details.
+Copyright (c) 2012-2017 Ivan Kuchin. See [LICENSE.txt](LICENSE.txt) for details.

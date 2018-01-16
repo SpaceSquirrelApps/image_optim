@@ -1,9 +1,10 @@
 require 'image_optim/bin_resolver'
+require 'image_optim/cache'
 require 'image_optim/config'
 require 'image_optim/handler'
 require 'image_optim/image_meta'
-require 'image_optim/image_path'
-require 'image_optim/railtie' if defined?(Rails)
+require 'image_optim/optimized_path'
+require 'image_optim/path'
 require 'image_optim/worker'
 require 'in_threads'
 require 'shellwords'
@@ -37,6 +38,12 @@ class ImageOptim
   # Allow lossy workers and optimizations
   attr_reader :allow_lossy
 
+  # Cache directory
+  attr_reader :cache_dir
+
+  # Cache worker digests
+  attr_reader :cache_worker_digests
+
   # Initialize workers, specify options using worker underscored name:
   #
   # pass false to disable worker
@@ -67,6 +74,8 @@ class ImageOptim
       pack
       skip_missing_workers
       allow_lossy
+      cache_dir
+      cache_worker_digests
     ].each do |name|
       instance_variable_set(:"@#{name}", config.send(name))
       $stderr << "#{name}: #{send(name)}\n" if verbose
@@ -74,9 +83,13 @@ class ImageOptim
 
     @bin_resolver = BinResolver.new(self)
 
+    $stderr << "PATH: #{@bin_resolver.env_path}\n" if verbose
+
     @workers_by_format = Worker.create_all_by_format(self) do |klass|
       config.for_worker(klass)
     end
+
+    @cache = Cache.new(self, @workers_by_format)
 
     log_workers_by_format if verbose
 
@@ -85,39 +98,43 @@ class ImageOptim
 
   # Get workers for image
   def workers_for_image(path)
-    @workers_by_format[ImagePath.convert(path).format]
+    @workers_by_format[Path.convert(path).image_format]
   end
 
-  # Optimize one file, return new path as OptimizedImagePath or nil if
+  # Optimize one file, return new path as OptimizedPath or nil if
   # optimization failed
   def optimize_image(original)
-    original = ImagePath.convert(original)
+    original = Path.convert(original)
     return unless (workers = workers_for_image(original))
-    result = Handler.for(original) do |handler|
-      workers.each do |worker|
-        handler.process do |src, dst|
-          worker.optimize(src, dst)
+
+    optimized = @cache.fetch(original) do
+      Handler.for(original) do |handler|
+        workers.each do |worker|
+          handler.process do |src, dst|
+            worker.optimize(src, dst)
+          end
         end
       end
     end
-    return unless result
-    ImagePath::Optimized.new(result, original)
+
+    return unless optimized
+    OptimizedPath.new(optimized, original)
   end
 
-  # Optimize one file in place, return original as OptimizedImagePath or nil if
+  # Optimize one file in place, return original as OptimizedPath or nil if
   # optimization failed
   def optimize_image!(original)
-    original = ImagePath.convert(original)
+    original = Path.convert(original)
     return unless (result = optimize_image(original))
     result.replace(original)
-    ImagePath::Optimized.new(original, result.original_size)
+    OptimizedPath.new(original, result.original_size)
   end
 
   # Optimize image data, return new data or nil if optimization failed
   def optimize_image_data(original_data)
-    image_meta = ImageMeta.for_data(original_data)
-    return unless image_meta && image_meta.format
-    ImagePath.temp_file %W[image_optim .#{image_meta.format}] do |temp|
+    format = ImageMeta.format_for_data(original_data)
+    return unless format
+    Path.temp_file %W[image_optim .#{format}] do |temp|
       temp.binmode
       temp.write(original_data)
       temp.close
@@ -152,25 +169,43 @@ class ImageOptim
     run_method_for(datas, :optimize_image_data, &block)
   end
 
-  # Optimization methods with default options
-  def self.method_missing(method, *args, &block)
-    if method_defined?(method) && method.to_s =~ /^optimize_image/
-      new.send(method, *args, &block)
-    else
-      super
+  class << self
+    # Optimization methods with default options
+    def method_missing(method, *args, &block)
+      if optimize_image_method?(method)
+        new.send(method, *args, &block)
+      else
+        super
+      end
     end
-  end
 
-  # Version of image_optim gem spec loaded
-  def self.version
-    Gem.loaded_specs['image_optim'].version.to_s
-  rescue
-    'DEV'
-  end
+    def respond_to_missing?(method, include_private = false)
+      optimize_image_method?(method) || super
+    end
 
-  # Full version of image_optim
-  def self.full_version
-    "image_optim v#{version}"
+    if RUBY_VERSION < '1.9'
+      def respond_to?(method, include_private = false)
+        optimize_image_method?(method) || super
+      end
+    end
+
+    # Version of image_optim gem spec loaded
+    def version
+      Gem.loaded_specs['image_optim'].version.to_s
+    rescue
+      'DEV'
+    end
+
+    # Full version of image_optim
+    def full_version
+      "image_optim v#{version}"
+    end
+
+  private
+
+    def optimize_image_method?(method)
+      method_defined?(method) && method.to_s =~ /^optimize_image/
+    end
   end
 
   # Are there workers for file at path?
