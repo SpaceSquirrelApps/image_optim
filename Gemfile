@@ -2,15 +2,14 @@ source 'https://rubygems.org'
 
 gemspec
 
-if RUBY_VERSION >= '1.9'
-  gem 'codeclimate-test-reporter', :group => :test, :require => nil
+if ENV['CODECLIMATE']
+  group :test do
+    gem 'simplecov'
+
+    gem 'codeclimate-test-reporter'
+  end
 end
 
-%w[
-  rails
-  sprockets
-  sprockets-rails
-].each do |gem_name|
-  version = ENV[gem_name.tr('-', '_').upcase + '_VERSION']
-  gem gem_name, version if version
+if RUBY_VERSION >= '2.0'
+  gem 'travis_check_rubies', '~> 0.2'
 end

@@ -5,9 +5,8 @@
 /rdoc/
 /.yardoc/
 /coverage/
-/vendor/
 
-Gemfile.lock
+/Gemfile.lock
 Makefile
 *.o
 *.bundle

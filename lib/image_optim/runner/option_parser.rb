@@ -133,7 +133,9 @@ ImageOptim::Runner::OptionParser::DEFINE = proc do |op, options|
     options[:threads] = threads
   end
 
-  op.on('--[no-]nice N', Integer, 'Nice level (defaults to 10)') do |nice|
+  op.on('--[no-]nice N', Integer, 'Nice level, priority of all used tools '\
+      'with higher value meaning lower priority, in range -20..19, negative '\
+      'values can be set only if run by root user (defaults to 10)') do |nice|
     options[:nice] = nice
   end
 
@@ -141,6 +143,19 @@ ImageOptim::Runner::OptionParser::DEFINE = proc do |op, options|
       'by default image_optim_pack will be used if available, '\
       'will turn on skip-missing-workers unless explicitly disabled') do |pack|
     options[:pack] = pack
+  end
+
+  op.separator nil
+  op.separator '  Caching:'
+
+  op.on('--cache-dir DIR', 'Cache optimized images '\
+        'into the specified directory') do |cache_dir|
+    options[:cache_dir] = cache_dir
+  end
+
+  op.on('--cache-worker-digests', 'Cache worker digests '\
+        '(updating workers invalidates cache)') do |cache_worker_digests|
+    options[:cache_worker_digests] = cache_worker_digests
   end
 
   op.separator nil
@@ -206,7 +221,9 @@ ImageOptim::Runner::OptionParser::DEFINE = proc do |op, options|
   op.separator nil
   op.separator '  Common options:'
 
-  op.on_tail('-v', '--verbose', 'Verbose output') do
+  op.on_tail('-v', '--verbose', 'Verbose output (show global and worker '\
+      'config, binary resolution log, information about each tool invocation, '\
+      'backtrace of exception)') do
     options[:verbose] = true
   end
 

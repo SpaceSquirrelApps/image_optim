@@ -2,8 +2,10 @@ require 'image_optim/bin_resolver/error'
 require 'image_optim/bin_resolver/simple_version'
 require 'image_optim/bin_resolver/comparable_condition'
 require 'image_optim/cmd'
+require 'image_optim/path'
 require 'shellwords'
 require 'digest/sha1'
+require 'date'
 
 class ImageOptim
   class BinResolver
@@ -17,6 +19,11 @@ class ImageOptim
         @name = name.to_sym
         @path = path.to_s
         @version = detect_version
+      end
+
+      def digest
+        return @digest if defined?(@digest)
+        @digest = File.exist?(@path) && Digest::SHA1.file(@path).hexdigest
       end
 
       def to_s
@@ -42,7 +49,9 @@ class ImageOptim
 
       # Fail if version will not work properly
       def check_fail!
-        fail UnknownVersion, "didn't get version of #{self}" unless version
+        unless version
+          fail UnknownVersion, "could not get version of #{name} at #{path}"
+        end
 
         FAIL_CHECKS.each do |bin_name, matcher, message|
           next unless bin_name == name
@@ -74,11 +83,11 @@ class ImageOptim
       def version_string
         case name
         when :advpng, :gifsicle, :jpegoptim, :optipng
-          capture("#{escaped_path} --version 2> /dev/null")[/\d+(\.\d+)+/]
+          capture("#{escaped_path} --version 2> #{Path::NULL}")[/\d+(\.\d+)+/]
         when :svgo, :pngquant
           capture("#{escaped_path} --version 2>&1")[/\d+(\.\d+)+/]
         when :jhead, :'jpeg-recompress'
-          capture("#{escaped_path} -V 2> /dev/null")[/\d+(\.\d+)+/]
+          capture("#{escaped_path} -V 2> #{Path::NULL}")[/\d+(\.\d+)+/]
         when :jpegtran, :cjpeg
           capture("#{escaped_path} -v - 2>&1")[/version (\d+\S*)/, 1]
         when :pngcrush

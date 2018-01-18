@@ -1,6 +1,6 @@
 require 'spec_helper'
 require 'image_optim/worker/optipng'
-require 'image_optim/image_path'
+require 'image_optim/path'
 
 describe ImageOptim::Worker::Optipng do
   describe 'strip option' do
@@ -8,8 +8,8 @@ describe ImageOptim::Worker::Optipng do
 
     let(:options){ {} }
     let(:optipng_version){ '0.7' }
-    let(:src){ instance_double(ImageOptim::ImagePath, :copy => nil) }
-    let(:dst){ instance_double(ImageOptim::ImagePath) }
+    let(:src){ instance_double(ImageOptim::Path, :copy => nil) }
+    let(:dst){ instance_double(ImageOptim::Path) }
 
     before do
       optipng_bin = instance_double(ImageOptim::BinResolver::Bin)
@@ -52,6 +52,50 @@ describe ImageOptim::Worker::Optipng do
         end
 
         subject.optimize(src, dst)
+      end
+    end
+  end
+
+  describe '#optimized?' do
+    let(:src){ instance_double(ImageOptim::Path, src_options) }
+    let(:dst){ instance_double(ImageOptim::Path, dst_options) }
+    let(:src_options){ {:size => 10} }
+    let(:dst_options){ {:size? => 9} }
+    let(:instance){ described_class.new(ImageOptim.new, instance_options) }
+    let(:instance_options){ {} }
+
+    subject{ instance.optimized?(src, dst) }
+
+    context 'when interlace option is enabled' do
+      let(:instance_options){ {:interlace => true} }
+
+      context 'when dst is empty' do
+        let(:dst_options){ {:size? => nil} }
+        it{ is_expected.to be_falsy }
+      end
+
+      context 'when dst is not empty' do
+        let(:dst_options){ {:size? => 20} }
+        it{ is_expected.to be_truthy }
+      end
+    end
+
+    context 'when interlace option is disabled' do
+      let(:instance_options){ {:interlace => false} }
+
+      context 'when dst is empty' do
+        let(:dst_options){ {:size? => nil} }
+        it{ is_expected.to be_falsy }
+      end
+
+      context 'when dst is greater than or equal to src' do
+        let(:dst_options){ {:size? => 10} }
+        it{ is_expected.to be_falsy }
+      end
+
+      context 'when dst is less than src' do
+        let(:dst_options){ {:size? => 9} }
+        it{ is_expected.to be_truthy }
       end
     end
   end

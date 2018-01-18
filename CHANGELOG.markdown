@@ -2,7 +2,51 @@
 
 ## unreleased
 
-* Use `FileUtils.copy_file` in `ImagePath#replace` to not read entire file into memory [#132](https://github.com/toy/image_optim/issues/132) [@toy](https://github.com/toy)
+* Show full bin search path in verbose output [@toy](https://github.com/toy)
+
+## v0.26.1 (2017-12-14)
+
+* Require `'date'` which is used in parsing pngout version [toy/image_optim_pack#14](https://github.com/toy/image_optim_pack/issues/14) [@toy](https://github.com/toy)
+
+## v0.26.0 (2017-11-13)
+
+* Enable `jpegrescan` by default after removing its dependency on `File::Slurp` and fixing for windows [#153](https://github.com/toy/image_optim/issues/153) [@toy](https://github.com/toy)
+* Extend description of `--verbose` flag [#152](https://github.com/toy/image_optim/issues/152) [@toy](https://github.com/toy)
+
+## v0.25.0 (2017-07-06)
+
+* Fix error `uninitialized constant EXIFR::JPEG` (breaking change in [exifr v1.3.0](https://github.com/remvee/exifr/commit/e073a22d06c39f2c1c0e77f5b5fe71545b25e967)) [#150](https://github.com/toy/image_optim/pull/150) [@abemedia](https://github.com/abemedia)
+* Add option to `pngquant` worker to limit maximum number of colors to use [#144](https://github.com/toy/image_optim/issues/144) [@toy](https://github.com/toy)
+
+## v0.24.3 (2017-05-04)
+
+* Set mode of cache files to `0666 & ~umask`, related to [#147](https://github.com/toy/image_optim/issues/147) [@toy](https://github.com/toy)
+
+## v0.24.2 (2017-02-18)
+
+* Describe `nice` level option [#140](https://github.com/toy/image_optim/issues/140) [@toy](https://github.com/toy)
+* Add instruction for installing `pngout` using brew [#143](https://github.com/toy/image_optim/pull/143) [@lukaselmer](https://github.com/lukaselmer)
+
+## v0.24.1 (2016-11-20)
+
+* Use `image_size ~> 1.5` with `apng` detection, so apng images are not optimised to one frame version [#142](https://github.com/toy/image_optim/issues/142) [@toy](https://github.com/toy)
+* Don't show `?` for unknown bin version in message about inability to determine version [@toy](https://github.com/toy)
+* Deduplicate bin resolving error messages [@toy](https://github.com/toy)
+
+## v0.24.0 (2016-08-14)
+
+* Rails image assets optimization is extracted into [image\_optim\_rails gem](https://github.com/toy/image_optim_rails) [#127](https://github.com/toy/image_optim/issues/127) [@toy](https://github.com/toy)
+* Add proper handling of `ImageOptim.respond_to?` [@toy](https://github.com/toy)
+* Fix an issue not working OptiPNG `interlace` option [#136](https://github.com/toy/image_optim/pull/136) [@mrk21](https://github.com/mrk21)
+* Minimize number of file system calls in default implementation of `optimized?` [#137](https://github.com/toy/image_optim/issues/137) [@toy](https://github.com/toy)
+
+## v0.23.0 (2016-07-17)
+
+* Added `cache_dir` and `cache_worker_digests` options to cache results [#83](https://github.com/toy/image_optim/issues/83) [@gpakosz](https://github.com/gpakosz)
+* Should work on windows [#24](https://github.com/toy/image_optim/issues/24) [@toy](https://github.com/toy)
+* Rename `ImageOptim::ImagePath` to `ImageOptim::Path` and its method `#format` to `#image_format` [@toy](https://github.com/toy)
+* Ignore empty config files [#133](https://github.com/toy/image_optim/issues/133) [@toy](https://github.com/toy)
+* Use `FileUtils.move` in `ImagePath#replace` to rename file instead of copying on same device, don't preserve mtime and atime [#134](https://github.com/toy/image_optim/issues/134) [@toy](https://github.com/toy)
 * Make `:allow_lossy` an individual option for workers that can use it, so it will be in the list of worker options [#130](https://github.com/toy/image_optim/issues/130) [@toy](https://github.com/toy)
 * Use first 8 characters of sha1 hex for jpegrescan version [#131](https://github.com/toy/image_optim/issues/131) [@toy](https://github.com/toy)
 
@@ -224,7 +268,7 @@
 
 ## v0.7.1 (2013-01-17)
 
-* Use more compatible redirect syntax `>&` [#9](https://github.com/toy/image_optim/issues/9) @"Chris Thompson"
+* Use more compatible redirect syntax `>&` [#9](https://github.com/toy/image_optim/issues/9) [@teaforthecat](https://github.com/teaforthecat)
 
 ## v0.7.0 (2013-01-17)
 
