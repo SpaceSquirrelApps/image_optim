@@ -3,12 +3,12 @@
 [![AppVeyor Status](https://img.shields.io/appveyor/ci/toy/image-optim/master.svg?style=flat&label=windows)](https://ci.appveyor.com/project/toy/image-optim)
 [![Code Climate](https://img.shields.io/codeclimate/maintainability/toy/image_optim.svg?style=flat)](https://codeclimate.com/github/toy/image_optim)
 [![Code Climate Coverage](https://img.shields.io/codeclimate/c/toy/image_optim.svg?style=flat)](https://codeclimate.com/github/toy/image_optim)
-[![Dependency Status](https://img.shields.io/gemnasium/toy/image_optim.svg?style=flat)](https://gemnasium.com/toy/image_optim)
+[![Depfu](https://badges.depfu.com/badges/221b4832fa96f613aa5401f7cb4030ac/overview.svg)](https://depfu.com/github/toy/image_optim)
 [![Inch CI](https://inch-ci.org/github/toy/image_optim.svg?branch=master&style=flat)](https://inch-ci.org/github/toy/image_optim)
 
 # image_optim
 
-Optimize (lossless compress, optionally lossy) images (jpeg, png, gif, svg) using external utilities:
+Command line tool and ruby interface to optimize (lossless compress, optionally lossy) jpeg, png, gif and svg images using external utilities:
 
 * [advpng](http://advancemame.sourceforge.net/doc-advpng.html) from [AdvanceCOMP](http://advancemame.sourceforge.net/comp-readme.html)
 (will use [zopfli](https://code.google.com/p/zopfli/) on default/maximum level 4)
@@ -25,7 +25,9 @@ Optimize (lossless compress, optionally lossy) images (jpeg, png, gif, svg) usin
 
 Based on [ImageOptim.app](http://imageoptim.com/).
 
-Documentation for [latest version](http://rubydoc.info/gems/image_optim/frames) and [master](http://rubydoc.info/github/toy/image_optim/master/frames).
+Documentation for [latest gem version](http://rubydoc.info/gems/image_optim/frames) and [master branch](http://rubydoc.info/github/toy/image_optim/master/frames).
+
+A test application with latest `image_optim` and `image_optim_pack` is available on heroku: https://iopack.herokuapp.com/.
 
 ## Gem installation
 
@@ -176,6 +178,20 @@ _Note: pngout is free to use even in commercial soft, but you can not redistribu
 
 ```bash
 npm install -g svgo
+```
+
+If you prefer to install `svgo` to your project directory, use one of the following commands instead:
+
+```bash
+npm install svgo
+
+yarn add svgo
+```
+
+When installing `svgo` to the project directory, you must add the following to your environment:
+
+```
+SVGO_BIN='node_modules/svgo/bin/svgo'
 ```
 
 ### jpeg-recompress installation (optional)
@@ -341,4 +357,4 @@ In separate file [CHANGELOG.markdown](CHANGELOG.markdown).
 
 ## Copyright
 
-Copyright (c) 2012-2017 Ivan Kuchin. See [LICENSE.txt](LICENSE.txt) for details.
+Copyright (c) 2012-2018 Ivan Kuchin. See [LICENSE.txt](LICENSE.txt) for details.
