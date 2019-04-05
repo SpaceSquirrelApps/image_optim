@@ -7,7 +7,7 @@ class ImageOptim
     #
     # Jhead internally uses jpegtran which should be on path
     class Jhead < Worker
-      ORIENTED = 2..8 # not top-left
+      ORIENTED = (2..8).freeze # not top-left
 
       # Works on jpegs
       def image_formats
@@ -25,6 +25,7 @@ class ImageOptim
 
       def optimize(src, dst)
         return false unless oriented?(src)
+
         src.copy(dst)
         args = %W[
           -autorot

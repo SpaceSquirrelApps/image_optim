@@ -15,6 +15,9 @@ Layout/CaseIndentation:
 Layout/DotPosition:
   EnforcedStyle: trailing
 
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: variable
+
 Layout/IndentArray:
   EnforcedStyle: consistent
 
@@ -25,6 +28,9 @@ Layout/IndentHash:
   EnforcedStyle: consistent
 
 Layout/IndentHeredoc:
+  Enabled: false
+
+Layout/RescueEnsureAlignment:
   Enabled: false
 
 Layout/SpaceBeforeBlockBraces:
@@ -38,17 +44,17 @@ Lint/AmbiguousBlockAssociation:
   Exclude:
     - spec/**/*_spec.rb
 
-Lint/EndAlignment:
-  EnforcedStyleAlignWith: variable
-
 Lint/NestedPercentLiteral:
+  Enabled: false
+
+Lint/UnneededRequireStatement:
   Enabled: false
 
 Lint/UnneededSplatExpansion:
   Enabled: false
 
 Metrics/AbcSize:
-  Max: 30
+  Max: 33
 
 Metrics/BlockLength:
   Exclude:
@@ -60,7 +66,10 @@ Metrics/ClassLength:
   Max: 150
 
 Metrics/CyclomaticComplexity:
-  Max: 10
+  Max: 11
+
+Metrics/LineLength:
+  Max: 120
 
 Metrics/MethodLength:
   Max: 25
@@ -82,6 +91,9 @@ Style/EmptyCaseCondition:
   Enabled: false
 
 Style/Encoding:
+  Enabled: false
+
+Style/ExpandPathArguments:
   Enabled: false
 
 Style/FormatStringToken:
@@ -111,5 +123,8 @@ Style/SymbolArray:
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: no_comma
 
-Style/TrailingCommaInLiteral:
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
