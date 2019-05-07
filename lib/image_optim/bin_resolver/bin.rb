@@ -123,7 +123,7 @@ class ImageOptim
           # jpegrescan has no version so use first 8 characters of sha1 hex
           Digest::SHA1.file(path).hexdigest[0, 8] if path
         when :oxipng
-          capture("#{escaped_path} --version 2>&1")[/oxipng (\d+(\.\d+)+)/, 1]
+          capture("#{escaped_path} --version 2>&1")[0..50][/oxipng (\d+(\.\d+)+)/, 1]
         else
           fail "getting `#{name}` version is not defined"
         end
