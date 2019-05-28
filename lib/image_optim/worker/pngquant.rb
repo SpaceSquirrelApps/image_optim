@@ -6,6 +6,10 @@ class ImageOptim
   class Worker
     # http://pngquant.org/
     class Pngquant < Worker
+
+      IEDEBUG =
+      option(:iebug, false, 'iebug'){ |v| !!v }
+
       ALLOW_LOSSY_OPTION =
       option(:allow_lossy, false, 'Allow quality option'){ |v| !!v }
 
@@ -54,10 +58,11 @@ class ImageOptim
           --speed=#{speed}
           --output=#{dst}
           --force
-          #{max_colors}
-          --
-          #{src}
         ]
+        args.push("--iebug") if iebug
+        args.push("#{max_colors}")
+        args.push("--")
+        args.push("#{src}")
         execute(:pngquant, *args) && optimized?(src, dst)
       end
     end
