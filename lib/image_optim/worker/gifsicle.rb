@@ -32,9 +32,15 @@ class ImageOptim
         OptionHelpers.limit_with_range(v.to_i, 1..3)
       end
 
-      LOSSY_OPTION =
-      option(:lossy, nil, 'Shrink output file size at the cost of artifacts and noise') do |value|
+      ALLOW_LOSSY_OPTION =
+      option(:allow_lossy, false, 'Allow quality option') { |v| !!v }
+
+      # Adjust --lossy argument to quality you want (30 is very light compression, 200 is heavy)
+      QUALITY_OPTION =
+      option(:quality, 95, 'Shrink output file size at the cost of artifacts and noise') do |value|
         next if value.nil?
+
+        next unless allow_lossy
 
         value = OptionHelpers.limit_with_range(value.to_i, 65..95)
         value = 95 - value
@@ -65,7 +71,7 @@ class ImageOptim
         end
         args.unshift '--careful' if careful
         args.unshift "--optimize=#{level}" if level
-        args.unshift "--lossy=#{lossy}" if lossy
+        args.unshift "--lossy=#{quality}" if allow_lossy
         execute(:gifsicle, *args) && optimized?(src, dst)
       end
     end
