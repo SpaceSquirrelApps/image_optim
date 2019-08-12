@@ -8,9 +8,11 @@ class ImageOptim
   class Worker
     # http://pngquant.org/
     class Pngquant < Worker
-
-      IEDEBUG =
+      IEBUG =
       option(:iebug, false, 'iebug'){ |v| !!v }
+
+      STRIP_TAGS =
+      option(:strip_tags, false, 'Remove optional metadata') { |v| !!v }
 
       ALLOW_LOSSY_OPTION =
       option(:allow_lossy, false, 'Allow quality option'){ |v| !!v }
@@ -62,10 +64,11 @@ class ImageOptim
           --skip-if-larger
           --force
         ]
+        args.push("--strip") if strip_tags
         args.push("--iebug") if iebug
-        args.push("#{max_colors}")
+        args.push(max_colors.to_s)
         args.push("--")
-        args.push("#{src}")
+        args.push(src.to_s)
         execute(:pngquant, args, options) && optimized?(src, dst)
       end
     end
