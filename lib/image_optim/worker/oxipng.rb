@@ -14,6 +14,7 @@ class ImageOptim
         (value % 0.5).zero? ? value : 0.5
       end
 
+      STRIP_TAGS = option(:strip_tags, false, 'Remove optional metadata') { |v| !!v }
       ALPHA_OPTION = option(:alpha, false, 'Perform additional alpha optimizations') { |v| !!v }
       ZOPFLI_OPTION = option(:zopfli, false, 'Use the slower but better compressing Zopfli algorithm') { |v| !!v }
       FIX_OPTION = option(:fix, false, 'Enable error recovery') { |v| !!v }
@@ -32,13 +33,13 @@ class ImageOptim
 
       def optimize(src, dst)
         args = %W[
-          --strip=safe
           --opt=#{ optimiation }
           --out=#{ dst }
           --filters=#{ delta_filters.to_s.tr('.', ',') }
           --timeout=#{ timeout }
         ]
 
+        args.push('--strip=safe') if strip_tags
         args.push('--alpha') if alpha
         args.push('--zopfli') if zopfli
         args.push('--fix') if fix

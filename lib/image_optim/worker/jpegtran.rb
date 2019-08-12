@@ -7,8 +7,8 @@ class ImageOptim
     # Uses jpegtran through jpegrescan if enabled, jpegrescan is vendored with
     # this gem
     class Jpegtran < Worker
-      COPY_CHUNKS_OPTION =
-      option(:copy_chunks, false, 'Copy all chunks'){ |v| !!v }
+      STRIP_TAGS =
+      option(:strip_tags, false, 'Remove optional metadata') { |v| !!v }
 
       PROGRESSIVE_OPTION =
       option(:progressive, true, 'Create progressive JPEG file'){ |v| !!v }
@@ -23,21 +23,19 @@ class ImageOptim
 
       def optimize(src, dst)
         if jpegrescan
-          args = %W[
-            #{src}
-            #{dst}
-          ]
-          args.unshift '-s' unless copy_chunks
+          args = [src.to_s, dst.to_s]
+          args.unshift('-s') if strip_tags
           resolve_bin!(:jpegtran)
           execute(:jpegrescan, *args) && optimized?(src, dst)
         else
           args = %W[
             -optimize
             -outfile #{dst}
-            #{src}
+            -copy #{strip_tags ? 'none' : 'all'}
           ]
-          args.unshift '-copy', (copy_chunks ? 'all' : 'none')
-          args.unshift '-progressive' if progressive
+          args.push('-progressive') if progressive
+          args.push(src.to_s)
+
           execute(:jpegtran, *args) && optimized?(src, dst)
         end
       end
