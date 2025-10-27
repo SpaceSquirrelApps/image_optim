@@ -113,6 +113,8 @@ class ImageOptim
           capture("#{escaped_path} --version 2> #{Path::NULL}")[/\d+(\.\d+)+/]
         when :svgo, :pngquant
           capture("#{escaped_path} --version 2>&1")[/\A\d+(\.\d+)+/]
+        when :cwebp
+          capture("#{escaped_path} -version 2>&1")[/\d+(\.\d+)+/]
         when :jhead, :'jpeg-recompress'
           capture("#{escaped_path} -V 2> #{Path::NULL}")[/\d+(\.\d+)+/]
         when :jpegtran, :cjpeg
