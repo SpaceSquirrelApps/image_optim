@@ -20,6 +20,7 @@ require 'shellwords'
   jhead jpegoptim jpegrecompress jpegtran cjpeg guetzli
   gifsicle
   svgo
+  cwebp dwebp
 ].each do |worker|
   require "image_optim/worker/#{worker}"
 end
