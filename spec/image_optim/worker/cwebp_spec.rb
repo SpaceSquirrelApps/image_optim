@@ -77,7 +77,7 @@ describe ImageOptim::Worker::Cwebp do
     describe 'default' do
       subject{ described_class::METHOD_OPTION.default }
 
-      it{ is_expected.to eq(4) }
+      it{ is_expected.to eq(6) }
     end
 
     describe 'value' do
@@ -86,7 +86,7 @@ describe ImageOptim::Worker::Cwebp do
       context 'by default' do
         let(:options){ {} }
 
-        it{ is_expected.to eq(4) }
+        it{ is_expected.to eq(6) }
       end
 
       context 'when value is less than 0' do
@@ -107,84 +107,46 @@ describe ImageOptim::Worker::Cwebp do
     end
   end
 
-  describe 'alpha_quality option' do
+  describe 'mt option' do
     describe 'default' do
-      subject{ described_class::ALPHA_QUALITY_OPTION.default }
+      subject{ described_class::MT_OPTION.default }
 
-      it{ is_expected.to eq(100) }
+      it{ is_expected.to eq(true) }
     end
 
     describe 'value' do
-      let(:subject){ described_class.new(ImageOptim.new, options).alpha_quality }
+      subject{ described_class.new(ImageOptim.new, options) }
+
+      let(:src){ instance_double(ImageOptim::Path, to_s: '/tmp/src.webp') }
+      let(:dst){ instance_double(ImageOptim::Path, to_s: '/tmp/dst.webp') }
+
+      before do
+        allow(subject).to receive(:resolve_bin!)
+        allow(subject).to receive(:optimized?)
+      end
 
       context 'by default' do
         let(:options){ {} }
 
-        it{ is_expected.to eq(100) }
-      end
+        it 'should add -mt to arguments' do
+          expect(subject).to receive(:execute) do |_bin, *args|
+            expect(args.join(' ')).to match(/(^| )-mt($| )/)
+          end
 
-      context 'when value is less than 0' do
-        let(:options){ {alpha_quality: -50} }
-
-        it 'sets to 0' do
-          is_expected.to eq(0)
+          subject.optimize(src, dst)
         end
       end
 
-      context 'when value is more than 100' do
-        let(:options){ {alpha_quality: 150} }
+      context 'when mt is false' do
+        let(:options){ {mt: false} }
 
-        it 'sets to 100' do
-          is_expected.to eq(100)
+        it 'should not add -mt to arguments' do
+          expect(subject).to receive(:execute) do |_bin, *args|
+            expect(args.join(' ')).not_to match(/(^| )-mt($| )/)
+          end
+
+          subject.optimize(src, dst)
         end
-      end
-    end
-  end
-
-  describe 'strip option' do
-    subject{ described_class.new(ImageOptim.new, options) }
-
-    let(:options){ {} }
-    let(:src){ instance_double(ImageOptim::Path, to_s: '/tmp/src.webp') }
-    let(:dst){ instance_double(ImageOptim::Path, to_s: '/tmp/dst.webp') }
-
-    before do
-      allow(subject).to receive(:resolve_bin!)
-      allow(subject).to receive(:optimized?)
-    end
-
-    context 'by default (strip all)' do
-      it 'should add -metadata none to arguments' do
-        expect(subject).to receive(:execute) do |_bin, *args|
-          expect(args.join(' ')).to match(/(^| )-metadata none($| )/)
-        end
-
-        subject.optimize(src, dst)
-      end
-    end
-
-    context 'when strip is :none' do
-      let(:options){ {strip: :none} }
-
-      it 'should add -metadata all to keep all metadata' do
-        expect(subject).to receive(:execute) do |_bin, *args|
-          expect(args.join(' ')).to match(/(^| )-metadata all($| )/)
-        end
-
-        subject.optimize(src, dst)
-      end
-    end
-
-    context 'when strip is [:exif]' do
-      let(:options){ {strip: [:exif]} }
-
-      it 'should keep icc and xmp metadata' do
-        expect(subject).to receive(:execute) do |_bin, *args|
-          args_string = args.join(' ')
-          expect(args_string).to match(/(^| )-metadata (icc,xmp|xmp,icc)($| )/)
-        end
-
-        subject.optimize(src, dst)
       end
     end
   end
@@ -203,17 +165,18 @@ describe ImageOptim::Worker::Cwebp do
     context 'when lossy not allowed (lossless mode)' do
       let(:options){ {} }
 
-      it 'should add -lossless to arguments' do
-        expect(subject).to receive(:execute) do |_bin, *args|
-          expect(args.join(' ')).to match(/(^| )-lossless($| )/)
+      it 'should add -near_lossless 0 to arguments' do
+        expect(subject).to receive(:execute) do |_bin, args|
+          expect(args).to include('-near_lossless')
+          expect(args).to include('0')
         end
 
         subject.optimize(src, dst)
       end
 
       it 'should not add -q to arguments' do
-        expect(subject).to receive(:execute) do |_bin, *args|
-          expect(args.join(' ')).not_to match(/(^| )-q($| )/)
+        expect(subject).to receive(:execute) do |_bin, args|
+          expect(args).not_to include('-q')
         end
 
         subject.optimize(src, dst)
@@ -224,16 +187,17 @@ describe ImageOptim::Worker::Cwebp do
       let(:options){ {allow_lossy: true, quality: 80} }
 
       it 'should add -q with quality to arguments' do
-        expect(subject).to receive(:execute) do |_bin, *args|
-          expect(args.join(' ')).to match(/(^| )-q 80($| )/)
+        expect(subject).to receive(:execute) do |_bin, args|
+          expect(args).to include('-q')
+          expect(args).to include('80')
         end
 
         subject.optimize(src, dst)
       end
 
-      it 'should not add -lossless to arguments' do
-        expect(subject).to receive(:execute) do |_bin, *args|
-          expect(args.join(' ')).not_to match(/(^| )-lossless($| )/)
+      it 'should not add -near_lossless to arguments' do
+        expect(subject).to receive(:execute) do |_bin, args|
+          expect(args).not_to include('-near_lossless')
         end
 
         subject.optimize(src, dst)

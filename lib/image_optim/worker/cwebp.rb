@@ -26,66 +26,39 @@ class ImageOptim
       end
 
       METHOD_OPTION =
-      option(:method, 4, 'Compression method ' \
+      option(:method, 6, 'Compression method ' \
                          '`0` - fast, ' \
                          '`6` - slower/better') do |v|
         OptionHelpers.limit_with_range(v.to_i, 0..6)
       end
 
-      ALPHA_QUALITY_OPTION =
-      option(:alpha_quality, 100, 'Alpha channel compression quality ' \
-                                  '`0`..`100`') do |v|
-        OptionHelpers.limit_with_range(v.to_i, 0..100)
-      end
-
-      STRIP_OPTION =
-      option(:strip, :all, Array, 'List of metadata to strip: ' \
-                                  '`:exif`, ' \
-                                  '`:icc`, ' \
-                                  '`:xmp`, ' \
-                                  '`:none` or ' \
-                                  '`:all`') do |v|
-        values = Array(v).map(&:to_s)
-        known_values = %w[exif icc xmp none all]
-        unknown_values = values - known_values
-        unless unknown_values.empty?
-          warn "Unknown metadata for cwebp: #{unknown_values.join(', ')}"
-        end
-        values & known_values
-      end
+      MT_OPTION =
+      option(:mt, true, 'Enable multi-threaded encoding'){ |v| !!v }
 
       def image_formats
         [:webp]
       end
 
       def optimize(src, dst, options = {})
-        args = %W[
-          -o #{dst}
-          -m #{method}
-          -alpha_q #{alpha_quality}
-        ]
+        args = []
 
+        # Add multi-threading if enabled
+        args.push('-mt') if mt
+
+        # Quality/lossless setting
         if allow_lossy
-          args.unshift("-q #{quality}")
+          args.push('-q', quality.to_s)
         else
-          args.unshift('-lossless')
+          args.push('-near_lossless', '0')
         end
 
-        # Handle metadata stripping
-        if strip.include?('all')
-          args.unshift('-metadata', 'none')
-        elsif strip.include?('none')
-          args.unshift('-metadata', 'all')
-        else
-          # Build metadata string from what to keep
-          metadata_to_keep = %w[exif icc xmp] - strip
-          unless metadata_to_keep.empty?
-            args.unshift('-metadata', metadata_to_keep.join(','))
-          else
-            args.unshift('-metadata', 'none')
-          end
-        end
+        # Compression method
+        args.push('-m', method.to_s)
 
+        # Output file
+        args.push('-o', dst.to_s)
+
+        # Input file
         args.push('--')
         args.push(src.to_s)
 
